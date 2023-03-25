@@ -1,0 +1,28 @@
+version: '3.3'
+services:
+  assignment1_fe:
+    container_name: assignment1_fe
+    restart: always
+    env_file: .env
+    build: .
+    networks:
+      - db_network
+      - web_network
+  nginx_fe:
+    container_name: nginx_fe
+    restart: always
+    image: "nginx:latest"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    networks:
+      - web_network
+    depends_on: 
+      - assignment1_fe
+networks:
+  db_network:
+    driver: bridge
+  web_network:
+    driver: bridge
+ 
