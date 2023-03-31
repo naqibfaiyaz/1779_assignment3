@@ -16,64 +16,12 @@ from apps import AWS_ACCESS_KEY, AWS_SECRET_KEY, db, app_manager_fe
 @blueprint.route('/')
 # @login_required
 def RedirectIndex():
-    ec2 = boto3.client('ec2',
-        aws_access_key_id=AWS_ACCESS_KEY,
-        aws_secret_access_key=AWS_SECRET_KEY,
-        region_name='us-east-1')
-    
-    instances = ec2.describe_instances(
-        Filters=[
-        {
-            'Name': 'tag:Name',
-            'Values': [
-                'memcache',
-            ]
-        },
-    ])
-
-    newMemcacheNodes=[]
-    if memcacheNodes.query.count()==0:
-        for instance in instances['Reservations']:
-            for node in instance['Instances']:
-                if node['State']['Name']=='running':
-                    instanceId = node['InstanceId']
-                    instancePrivateIp = node['PrivateIpAddress']
-                    instancePublicIp = node['PublicIpAddress']
-                    newMemcacheNodes.append(memcacheNodes(Instance_id = instanceId,
-                            private_ip = instancePrivateIp, public_ip= instancePublicIp, status='active'))
-            db.session.add_all(newMemcacheNodes)   
-            db.session.commit()
-    
-    if nodePartitions.query.count()==0:
-        newNodePartitions=[
-            nodePartitions(range_start = '00000000000000000000000000000000', range_end = '0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '10000000000000000000000000000000', range_end = '1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '20000000000000000000000000000000', range_end = '2FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '30000000000000000000000000000000', range_end = '3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '40000000000000000000000000000000', range_end = '4FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '50000000000000000000000000000000', range_end = '5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '60000000000000000000000000000000', range_end = '6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '70000000000000000000000000000000', range_end = '7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '80000000000000000000000000000000', range_end = '8FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = '90000000000000000000000000000000', range_end = '9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = 'A0000000000000000000000000000000', range_end = 'AFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = 'B0000000000000000000000000000000', range_end = 'BFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = 'C0000000000000000000000000000000', range_end = 'CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = 'D0000000000000000000000000000000', range_end = 'DFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = 'E0000000000000000000000000000000', range_end = 'EFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
-            nodePartitions(range_start = 'F0000000000000000000000000000000', range_end = 'FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
-            ]
-        db.session.add_all(newNodePartitions)   
-        db.session.commit()
-
-    changePolicyInDB('LRU', 10)
-
     return index()
 
 @blueprint.route('/index')
 # @login_required
 def index():
-    return redirect(app_manager_fe + '/index', code=302) # required for core BE
+    return redirect('/photoUpload/photos.html', code=302) # required for core BE
 
 @blueprint.route('/<template>')
 # @login_required

@@ -55,11 +55,23 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Image</label>
-                                                            <img src={{data.img}} width="100">
+                                                            <img src={{data.img}} width="200">
                                                         </div>
                                                         <div class="form-group">
-                                                            <label>Created At</label>
-                                                            <span src={{key}} width="100">{{data.created_at}}</span>
+                                                            <label>Labels</label>
+                                                            {% if data.label %}
+                                                                {% for label in data.label %}
+                                                                    <span class="badge rounded-pills bg-info">{{label}}</span>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Categories</label>
+                                                            {% if data.category %}
+                                                                {% for category in data.category %}
+                                                                    <span class="badge rounded-pills bg-info">{{category}}</span>
+                                                                {% endfor %}
+                                                            {% endif %}
                                                         </div>
                                                         <div class="form-group">
                                                             <label for="value">New Image</label>

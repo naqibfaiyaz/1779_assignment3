@@ -68,19 +68,33 @@
                                                             <th>id</th>
                                                             <th>Key</th>
                                                             <th>Img Path</th>
-                                                            <th>Created at</th>
-                                                            <th>Updated at</th>
+                                                            <th>Labels</th>
+                                                            <th>Categories</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {% if keysFromDB %}
                                                             {% for key in keysFromDB %}
                                                             <tr>
-                                                                <th scope="row">{{keysFromDB[key].id}}</th>
+                                                                <th scope="row">{{keysFromDB[key].key_md5}}</th>
                                                                 <td>{{keysFromDB[key].key}}</td>
-                                                                <td>{{keysFromDB[key].img_path}}</td>
-                                                                <td>{{keysFromDB[key].created_at}}</td>
-                                                                <td>{{keysFromDB[key].updated_at}}</td>
+                                                                <td><img src={{keysFromDB[key].img_url}} width="50"/></td>
+                                                                <!-- <td>{{keysFromDB[key].labels}}</td>
+                                                                <td>{{keysFromDB[key].categories}}</td> -->
+                                                                <td style="white-space: inherit;">
+                                                                    {% if keysFromDB[key].labels %}
+                                                                        {% for label in keysFromDB[key].labels %}
+                                                                            <span class="badge rounded-pills bg-info">{{label}}</span>
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td style="white-space: inherit;">
+                                                                    {% if keysFromDB[key].categories %}
+                                                                        {% for category in keysFromDB[key].categories %}   
+                                                                            <span class="badge rounded-pills bg-info">{{category}}</span>
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                </td>
                                                             </tr>
                                                             {% endfor %}
                                                         {% endif %}

@@ -13,14 +13,14 @@ def upload_file(file):
     filename = ''.join(random.choice(string.ascii_lowercase) for i in range(32)) + secure_filename(file.filename)
     apps.logger.info(filename)
 
-    bucket_name='1779cloudcomputing'
+    bucket_name=apps.STORAGE_BUCKET
     # s3_upload(bucket_name, file, filename)
     print(file)
-    response = requests.post(apps.storageUrl + "/upload", files={"file": file}, data={"bucket": bucket_name, "filename": filename})
+    response = s3_upload(bucket_name, file, filename)
 
-    print(response.content)
-    return json.loads(response.content)["data"]
+    print(response)
+    return response["data"]
 
 def removeAllImages():
-    bucket_name='1779cloudcomputing'
+    bucket_name=apps.STORAGE_BUCKET
     requests.post(apps.storageUrl + "/delete_images", data={"bucket": bucket_name})

@@ -15,7 +15,7 @@ import logging, doctest
 db = SQLAlchemy()
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-storageUrl=os.getenv('storage_url')
+STORAGE_URL=os.getenv('STORAGE_URL')
 policyManagementUrl=os.getenv('app_manager_url')
 backendUrl=os.getenv('backend_url')
 nodeManagerUrl=os.getenv('node_manager')
@@ -24,6 +24,11 @@ FE_url=os.getenv('FE_url')
 app_manager_fe=os.getenv('app_manager_fe')
 AWS_ACCESS_KEY=os.getenv('aws_access_key_id')
 AWS_SECRET_KEY=os.getenv('aws_secret_access_key')
+REDIS_ENDPOINT=os.getenv('REDIS_ENDPOINT')
+STORAGE_BUCKET=os.getenv('STORAGE_BUCKET')
+OS_ENDPOINT=os.getenv('OS_ENDPOINT')
+OS_USERNAME=os.getenv('OS_USERNAME')
+OS_PASSWORD=os.getenv('OS_PASSWORD')
 # login_manager = LoginManager()
 
 def register_extensions(app):
@@ -32,9 +37,8 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
-    for module_name in ('home', 'photoUpload', 'nodePartitions', 'cloudWatch', 'memcacheManager', 's3Manager', 'policyManager', 'appManager', 'autoScaler'):
+    for module_name in ('home', 'photoUpload', 'aws_elasticache', 'aws_dynamo', 'aws_sqs', 'aws_rekognition', 'aws_opensearch'):
         module = import_module('apps.services.{}.routes'.format(module_name))
-        print(module)
         app.register_blueprint(module.blueprint)
 
 
