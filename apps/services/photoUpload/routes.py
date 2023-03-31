@@ -7,12 +7,11 @@ from apps.services.photoUpload import blueprint
 from flask import render_template, request, redirect, url_for, json
 import requests
 from jinja2 import TemplateNotFound
-from apps import logger, grafanaUrl, FE_url, app_manager_fe
+from apps import logger, grafanaUrl, API_ENDPOINT
 from apps.services.home.routes import get_segment
-from apps.services.memcacheManager.routes import getSinglePhotoFromMemcache, getAllPhotosFromCache, invalidateKeyFromMemcache, deleteAllKeysFromDB, getAllPhotosFromDB, putPhotoInMemcache, getPolicyFromDB, changePolicyInDB
 from apps.services.helper import upload_file, removeAllImages
 from apps.services.aws_elasticache.routes import put_cache, get_cache, get_all_cache, delete_cache
-from apps.services.aws_dynamo.routes import update_key, get_key, get_keys_from_db
+from apps.services.aws_dynamo.routes import update_key, get_key, get_keys_from_db, delete_key
 from apps.services.aws_sqs.routes import produce_queue
 from apps.services.aws_opensearch.routes import get_from_search_index, put_search_index
 
@@ -62,19 +61,24 @@ def putPhoto():
         upload_response = upload_file(file)
         print(upload_response)
         if upload_response:
-            db_response = json.loads(update_key(key, upload_response).data)
-            put_search_index(db_response['data']['key']['key_md5'], db_response['data']['key']['key'], db_response['data']['new_value'])
-            queue_response = produce_queue(db_response['data']['key']['key_md5'])
-            print(json.loads(queue_response.data))
-            if db_response:
-                cache_response = json.loads(put_cache(key, upload_response).data)
-                print(cache_response)
+            # db_response = json.loads(update_key(key, upload_response).data)
+            # put_search_index(db_response['data']['key']['key_md5'], db_response['data']['key']['key'], db_response['data']['new_value'])
+            queue_response = produce_queue(key, upload_response)
+            # print(json.loads(queue_response.data))
+            # if db_response:
+                # cache_response = json.loads(put_cache(key, upload_response).data)
+                # print(cache_response)
         # response = putPhotoInMemcache(key, file)
         
         # logger.info('Put request received- ' + str(response))
 
-        return render_template("photoUpload/addPhoto.html", msg=cache_response["msg"])
+        return render_template("photoUpload/addPhoto.html", msg="Key added to the queue, please wait a bit for the data")
     elif key:
+        print(get_cache(key))
+        checkInCache = json.loads(get_cache(key).data)
+        if 'success' in checkInCache and checkInCache['success']:
+            return render_template("photoUpload/addPhoto.html", msg="Key exists, please upload a new image", data=cache_response["content"], key=key)
+        
         checkInDB = json.loads(get_key(key).data)
         if 'success' in checkInDB and checkInDB['success']:
             cache_response = json.loads(put_cache(checkInDB['content']['key'], checkInDB['content']['img_url'], checkInDB['content']['labels'], checkInDB['content']['categories']).data)
@@ -92,7 +96,10 @@ def putPhoto():
 def getSinglePhoto(url_key):
     key = url_key or request.form.get('key')
     logger.info(request.form)
-    cacheData=json.loads(get_cache(key).data)
+    cacheData=json.loads(requests.post(API_ENDPOINT, json={
+        "eventName": "GET_SINGLE_CACHE",
+        "key": key
+    }).content)
 
     logger.info('Get request received for single key- ' + key, str(cacheData))
     logger.info(cacheData)
@@ -104,7 +111,10 @@ def getSinglePhoto(url_key):
 
 @blueprint.route('/getAllCache',methods=['POST'])
 def getAllPhotos():
-    return json.loads(get_all_cache().data)["content"]
+    return json.loads(requests.post(API_ENDPOINT, json={
+        "eventName": "GET_ALL_CACHE",
+        "search_value": "build"
+    }).content)['content']
 
 @blueprint.route('/invalidate_key/<url_key>',methods=['GET', 'POST'])
 def invalidateKey(url_key) :
@@ -115,22 +125,41 @@ def invalidateKey(url_key) :
 
 @blueprint.route('/getAllFromDB',methods=['POST'])
 def getDBAllPhotos():
-    print(json.loads(get_keys_from_db().data)["content"])
     return json.loads(get_keys_from_db().data)["content"]
 
 
 @blueprint.route('/deleteAllKeys',methods=['GET'])
 def deleteAllKeys():
-    response = deleteAllKeysFromDB()
+    bucket_response = removeAllImages()
+    print(bucket_response)
+    
+    if 'success' in bucket_response and bucket_response['success']:
+        allPhotos=getDBAllPhotos()
+        print(allPhotos)
+        i=0
+        for photo in allPhotos:
+            print(photo)
+            response = delete_key(photo)
+            if response.status_code==200:
+                i=i+1
 
-    if 'success' in response and response['success']=='true':
-        return redirect(url_for("photoUpload_blueprint.route_template", template="knownKeys.html", msg="All Keys are deleted"))
+        if len(allPhotos)==i:
+            msg="All Keys are deleted"
+        else:
+            msg=i + " Keys are deleted"
+    else: 
+        msg="No image to delete"
+
+    return redirect(url_for("photoUpload_blueprint.route_template", template="knownKeys.html", msg=msg))
 
 @blueprint.route('/getSearchedData', methods=['POST'])
 def getSearchedPhotos():
-    response = json.loads(get_from_search_index(request.form.get('search')).data)
+    response = json.loads(requests.post(API_ENDPOINT, json={
+        "eventName": "FULL_TEXT_SEARCH",
+        "search_value": request.form.get('search')
+    }).content)['content']
     # return json.dumps(response['content'])
-    return render_template("photoUpload/photos.html", memcache=response['content'])
+    return render_template("photoUpload/photos.html", memcache=response)
 # @blueprint.route('/changePolicy',methods=['POST'])
 # def changePolicy():
 #     policy = request.form.get("replacement_policy")

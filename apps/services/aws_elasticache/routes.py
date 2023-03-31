@@ -51,13 +51,17 @@ def get_cache(key=None):
     redis = Redis(host=REDIS_ENDPOINT)
 
     if redis.ping():
-        response = json.loads(redis.get(keyName))
+        response = redis.get(keyName)    
         print(response)
         if response:
-            response=response
+            response = json.loads(redis.get(keyName))
             status=True
             img_url=STORAGE_URL + response['img_url']
         else:
+            response = {
+                "label": None,
+                "category": None
+            }
             status=False
             img_url=None
     

@@ -5,8 +5,7 @@ Copyright (c) 2019 - present AppSeed.us
 
 from apps.services.aws_rekognition import blueprint
 from flask import request, json, Response
-from redis import Redis
-import logging, boto3
+import boto3
 from apps import AWS_ACCESS_KEY, AWS_SECRET_KEY, STORAGE_BUCKET
 
 @blueprint.route('/detect_label',methods=['POST'])

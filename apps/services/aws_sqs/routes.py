@@ -6,7 +6,7 @@ Copyright (c) 2019 - present AppSeed.us
 from apps.services.aws_sqs import blueprint
 from flask import request, json, Response
 from redis import Redis
-import logging, boto3
+import logging, boto3, hashlib
 from decimal import Decimal
 from apps import AWS_ACCESS_KEY, AWS_SECRET_KEY, STORAGE_URL
 from apps.services.aws_rekognition.routes import detect_labels
@@ -16,11 +16,17 @@ from apps.services.aws_opensearch.routes import put_search_index
 
 @blueprint.route('/producer',methods=['POST'])
 #Upload a new file to an existing bucket
-def produce_queue(key_md5=None):
-    key_md5 = key_md5 or request.form.get('key_md5')
+def produce_queue(key=None, img=None):
+    keyName = key or request.form.get('key')
+    img = img or request.form.get('key_imgmd5')
+    key_md5 = hashlib.md5(keyName.encode()).hexdigest()
     
     print(key_md5)
-    
+    jsonObj={
+        'key_md5': key_md5,
+        'key': keyName,
+        'img': img
+    }
     logging.basicConfig(level=logging.INFO)
     # redis = Redis(host=REDIS_ENDPOINT, port=6379, decode_responses=True, ssl=True, username='myuser', password='MyPassword0123456789')
     # Get the service resource
@@ -30,10 +36,10 @@ def produce_queue(key_md5=None):
         region_name='us-east-1')
     
     # Get the queue
-    queue = sqs.get_queue_by_name(QueueName='assignment3.fifo')
+    queue = sqs.get_queue_by_name(QueueName='cc-assignment3')
 
    # Create a new message
-    response = queue.send_message(MessageBody=key_md5, MessageGroupId='cloud_computing_assignment3_image_producer')
+    response = queue.send_message(MessageBody=json.dumps(jsonObj))
 
     # The response is NOT a resource, but gives you a message ID and MD5
     if response:

@@ -71,7 +71,11 @@ def s3_delete_all(bucket=None, file=None, filename=None):
     response = bucket.objects.all().delete()
 
     if response:
-        return {"msg": "All object are deleted"}
+        return {
+            "success": True,
+            "msg": "All object are deleted"}
     else:
         print(response)
-        return {"msg": "Something went wrong"}
+        return {
+            "success": False,
+            "msg": "Something went wrong"}

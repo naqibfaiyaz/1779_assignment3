@@ -29,6 +29,7 @@ STORAGE_BUCKET=os.getenv('STORAGE_BUCKET')
 OS_ENDPOINT=os.getenv('OS_ENDPOINT')
 OS_USERNAME=os.getenv('OS_USERNAME')
 OS_PASSWORD=os.getenv('OS_PASSWORD')
+API_ENDPOINT=os.getenv('API_ENDPOINT')
 # login_manager = LoginManager()
 
 def register_extensions(app):

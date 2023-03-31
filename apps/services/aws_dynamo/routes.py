@@ -44,7 +44,7 @@ def insert_key(key=None, value=None):
 
 @blueprint.route('/update',methods=['PATCH'])
 #Upload a new file to an existing bucket
-def update_key(key=None, value=None, attributes=None, labels=None, categories=None):
+def update_key(key=None, value=None, attributes={}, labels={}, categories={}):
     # device_table = create_devices_table
     # print("Status:", device_table)
     keyName = key or request.form.get('key')

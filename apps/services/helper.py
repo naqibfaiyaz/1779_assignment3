@@ -6,7 +6,7 @@ import apps, base64, requests
 import os, string, random, glob
 from flask import json
 from werkzeug.utils import secure_filename
-from apps.services.s3Manager.routes import s3_upload
+from apps.services.s3Manager.routes import s3_upload, s3_delete_all
 
 def upload_file(file):
     print(file)
@@ -23,4 +23,5 @@ def upload_file(file):
 
 def removeAllImages():
     bucket_name=apps.STORAGE_BUCKET
-    requests.post(apps.storageUrl + "/delete_images", data={"bucket": bucket_name})
+    return s3_delete_all(bucket_name)
+    
