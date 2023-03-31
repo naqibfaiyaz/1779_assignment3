@@ -68,7 +68,7 @@
                                                         <th>Labels</th>
                                                         <th>Categories</th>
                                                         <th>View</th>
-                                                        <!-- <th>Invalidate</th> -->
+                                                        <th>Invalidate</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -100,10 +100,10 @@
                                                                 data-toggle="tooltip" name="getPhoto">View & Edit</a>
                                                         </td>
                                                         <!-- {% if memcache[key].img %} -->
-                                                        <!-- <td><a href="{{ url_for('photoUpload_blueprint.invalidateKey', url_key=key) }}"
+                                                        <td><a href="{{ url_for('photoUpload_blueprint.invalidateKey', url_key=key) }}"
                                                                 type="button" class="btn btn-warning" title="Invalidate"
                                                                 data-toggle="tooltip"
-                                                                name="invalidatePhoto">Invalidate</a></td> -->
+                                                                name="invalidatePhoto">Invalidate</a></td>
                                                         <!-- {% endif %} -->
                                                     </tr>
                                                     {% endfor %}

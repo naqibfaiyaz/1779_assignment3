@@ -13,7 +13,6 @@ from apps.services.helper import upload_file, removeAllImages
 from apps.services.aws_elasticache.routes import put_cache, get_cache, get_all_cache, delete_cache
 from apps.services.aws_dynamo.routes import update_key, get_key, get_keys_from_db, delete_key
 from apps.services.aws_sqs.routes import produce_queue
-from apps.services.aws_opensearch.routes import get_from_search_index, put_search_index
 
 @blueprint.route('/index')
 # @login_required
@@ -75,13 +74,23 @@ def putPhoto():
         return render_template("photoUpload/addPhoto.html", msg="Key added to the queue, please wait a bit for the data")
     elif key:
         print(get_cache(key))
-        checkInCache = json.loads(get_cache(key).data)
-        if 'success' in checkInCache and checkInCache['success']:
+        cache_response = json.loads(requests.post(API_ENDPOINT, json={
+            "eventName": "GET_SINGLE_CACHE",
+            "key": key
+        }).content)
+        if 'success' in cache_response and cache_response['success']:
             return render_template("photoUpload/addPhoto.html", msg="Key exists, please upload a new image", data=cache_response["content"], key=key)
         
         checkInDB = json.loads(get_key(key).data)
         if 'success' in checkInDB and checkInDB['success']:
-            cache_response = json.loads(put_cache(checkInDB['content']['key'], checkInDB['content']['img_url'], checkInDB['content']['labels'], checkInDB['content']['categories']).data)
+            cache_response = json.loads(requests.post(API_ENDPOINT, json={
+                "eventName": "PUT_CACHE",
+                "key": checkInDB['content']['key'],
+                "img_url": checkInDB['content']['img_url'],
+                "label": checkInDB['content']['labels'],
+                "categories": checkInDB['content']['categories']
+            }).content)
+            
             print(cache_response)
             if cache_response['success']:
                 return render_template("photoUpload/addPhoto.html", msg="Key exists, please upload a new image", data=cache_response["content"], key=key)
@@ -118,7 +127,10 @@ def getAllPhotos():
 
 @blueprint.route('/invalidate_key/<url_key>',methods=['GET', 'POST'])
 def invalidateKey(url_key) :
-    response = delete_cache(url_key)
+    response = json.loads(requests.post(API_ENDPOINT, json={
+        "eventName": "REMOVE_CACHE",
+        "key": url_key
+    }).content)
     logger.info("invalidateKey response: " + str(response))
     
     return redirect(url_for("photoUpload_blueprint.route_template", template="photos.html"))
