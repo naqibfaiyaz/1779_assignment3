@@ -52,6 +52,7 @@ def route_template(template):
 def putPhoto():
     # UPLOAD_FOLDER = apps.app_c'/static/assets/public/'
     # ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+    medium=request.form.get('medium')
     key = request.form.get('key') 
     file = request.files['image']
     print(key, file)
@@ -69,15 +70,20 @@ def putPhoto():
         # response = putPhotoInMemcache(key, file)
         
         # logger.info('Put request received- ' + str(response))
-
-        return render_template("photoUpload/addPhoto.html", msg="Key added to the queue, please wait a bit for the data")
+        if medium and medium=='api':
+            return cache_response
+        else:
+            return render_template("photoUpload/addPhoto.html", msg="Key added to the queue, please wait a bit for the data")
     elif key:
         cache_response = json.loads(requests.post(API_ENDPOINT, json={
             "eventName": "GET_SINGLE_CACHE",
             "key": key
         }).content)
-        if 'success' in cache_response and cache_response['success']:
-            return render_template("photoUpload/addPhoto.html", msg="Key exists, please upload a new image", data=cache_response["content"], key=key)
+        if medium and medium=='api':
+            return cache_response
+        else:
+            if 'success' in cache_response and cache_response['success']:
+                return render_template("photoUpload/addPhoto.html", msg="Key exists, please upload a new image", data=cache_response["content"], key=key)
         
         checkInDB = json.loads(get_key(key).data)
         if 'success' in checkInDB and checkInDB['success']:
@@ -90,10 +96,13 @@ def putPhoto():
             }).content)
             
             print(cache_response)
-            if cache_response['success']:
-                return render_template("photoUpload/addPhoto.html", msg="Key exists, please upload a new image", data=cache_response["content"], key=key)
+            if medium and medium=='api':
+                return cache_response
             else:
-                return render_template("photoUpload/addPhoto.html", msg="Key/Image mismatch, please upload properly")
+                if cache_response['success']:
+                    return render_template("photoUpload/addPhoto.html", msg="Key exists, please upload a new image", data=cache_response["content"], key=key)
+                else:
+                    return render_template("photoUpload/addPhoto.html", msg="Key/Image mismatch, please upload properly")
     
     return render_template("photoUpload/addPhoto.html", msg="Key/Image mismatch, please upload properly")
     
@@ -101,15 +110,19 @@ def putPhoto():
 # @blueprint.route('/get', defaults={'url_key': None}, methods=['POST'])
 @blueprint.route('/get/<url_key>',methods=['GET'])
 def getSinglePhoto(url_key):
+    medium=request.form.get('medium')
     cache_response = json.loads(requests.post(API_ENDPOINT, json={
             "eventName": "GET_SINGLE_CACHE",
             "key": url_key
         }).content)
 
-    if 'success' in cache_response and cache_response['success']:
-        return render_template("photoUpload/addPhoto.html", data=cache_response["content"], key=url_key)
-    elif "content" not in cache_response and "error" in cache_response:
-        return render_template("photoUpload/addPhoto.html", msg=cache_response["error"]["message"], key=url_key)
+    if medium and medium=='api':
+        return cache_response
+    else:
+        if 'success' in cache_response and cache_response['success']:
+            return render_template("photoUpload/addPhoto.html", data=cache_response["content"], key=url_key)
+        elif "content" not in cache_response and "error" in cache_response:
+            return render_template("photoUpload/addPhoto.html", msg=cache_response["error"]["message"], key=url_key)
 
 @blueprint.route('/getAllCache',methods=['POST'])
 def getAllPhotos():
