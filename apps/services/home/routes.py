@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from apps.services.home import blueprint
-from flask import render_template, request, json, redirect
+from flask import render_template, request, json, redirect, url_for
 # from flask_login import login_required
 from jinja2 import TemplateNotFound
 from apps.services.nodePartitions.models import nodePartitions, memcacheNodes
@@ -21,7 +21,7 @@ def RedirectIndex():
 @blueprint.route('/index')
 # @login_required
 def index():
-    return redirect('/photoUpload/photos.html', code=302) # required for core BE
+    return redirect(url_for("photoUpload_blueprint.route_template", template="photos.html"), code=302)
 
 @blueprint.route('/<template>')
 # @login_required
