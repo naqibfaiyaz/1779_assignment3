@@ -79,13 +79,17 @@ def putPhoto():
             "eventName": "GET_SINGLE_CACHE",
             "key": key
         }).content)
-        if medium and medium=='api':
-            return cache_response
-        else:
-            if 'success' in cache_response and cache_response['success']:
+        print(cache_response)
+        print(medium)
+        
+        if 'success' in cache_response and cache_response['success']:
+            if medium and medium=='api':
+                return cache_response
+            else:
                 return render_template("photoUpload/addPhoto.html", msg="Key exists, please upload a new image", data=cache_response["content"], key=key)
         
         checkInDB = json.loads(get_key(key).data)
+        print(checkInDB)
         if 'success' in checkInDB and checkInDB['success']:
             cache_response = json.loads(requests.post(API_ENDPOINT, json={
                 "eventName": "PUT_CACHE",
@@ -108,7 +112,7 @@ def putPhoto():
     
 
 # @blueprint.route('/get', defaults={'url_key': None}, methods=['POST'])
-@blueprint.route('/get/<url_key>',methods=['GET'])
+@blueprint.route('/get/<url_key>',methods=['GET', 'POST'])
 def getSinglePhoto(url_key):
     medium=request.form.get('medium')
     cache_response = json.loads(requests.post(API_ENDPOINT, json={
