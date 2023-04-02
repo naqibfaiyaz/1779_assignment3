@@ -1,10 +1,12 @@
 {
-    "dev": {
-        "app_function": "apps.__init__.app",
+    "cc": {
+        "app_function": "run.app",
         "aws_region": "us-east-1",
-        "profile_name": "prod",
-        "project_name": "1779-assignment",
+        "profile_name": "default",
+        "project_name": "assignment3",
         "runtime": "python3.9",
-        "s3_bucket": "zappa-pfh5py0hi"
+        "s3_bucket": "zappa-bfacbiyxa",
+        "role_name": "lambda_elaticache_vpc",
+        "role_arn": "arn:aws:iam::605592806746:role/lambda_elaticache_vpc"
     }
 }
