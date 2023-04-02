@@ -70,5 +70,5 @@ def create_app(config):
     app.config.from_object(config)
     register_extensions(app)
     register_blueprints(app)
-    configure_database(app)
+    # configure_database(app)
     return app
