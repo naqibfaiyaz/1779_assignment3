@@ -106,9 +106,6 @@ def getSinglePhoto(url_key):
             "key": url_key
         }).content)
 
-    logger.info('Get request received for single key- ' + url_key, str(cache_response))
-    logger.info(cache_response)
-    logger.info(request.method)
     if 'success' in cache_response and cache_response['success']:
         return render_template("photoUpload/addPhoto.html", data=cache_response["content"], key=url_key)
     elif "content" not in cache_response and "error" in cache_response:
