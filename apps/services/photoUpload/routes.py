@@ -101,20 +101,18 @@ def putPhoto():
 # @blueprint.route('/get', defaults={'url_key': None}, methods=['POST'])
 @blueprint.route('/get/<url_key>',methods=['GET'])
 def getSinglePhoto(url_key):
-    key = url_key or request.form.get('key')
-
     cache_response = json.loads(requests.post(API_ENDPOINT, json={
             "eventName": "GET_SINGLE_CACHE",
-            "key": key
+            "key": url_key
         }).content)
 
-    logger.info('Get request received for single key- ' + key, str(cache_response))
+    logger.info('Get request received for single key- ' + url_key, str(cache_response))
     logger.info(cache_response)
     logger.info(request.method)
     if 'success' in cache_response and cache_response['success']:
-        return render_template("photoUpload/addPhoto.html", data=cache_response["content"], key=key)
+        return render_template("photoUpload/addPhoto.html", data=cache_response["content"], key=url_key)
     elif "content" not in cache_response and "error" in cache_response:
-        return render_template("photoUpload/addPhoto.html", msg=cache_response["error"]["message"], key=key)
+        return render_template("photoUpload/addPhoto.html", msg=cache_response["error"]["message"], key=url_key)
 
 @blueprint.route('/getAllCache',methods=['POST'])
 def getAllPhotos():
