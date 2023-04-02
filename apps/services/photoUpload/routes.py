@@ -10,7 +10,6 @@ from jinja2 import TemplateNotFound
 from apps import logger, grafanaUrl, API_ENDPOINT
 from apps.services.home.routes import get_segment
 from apps.services.helper import upload_file, removeAllImages
-from apps.services.aws_elasticache.routes import put_cache, get_cache, get_all_cache, delete_cache
 from apps.services.aws_dynamo.routes import update_key, get_key, get_keys_from_db, delete_key
 from apps.services.aws_sqs.routes import produce_queue
 
@@ -73,7 +72,6 @@ def putPhoto():
 
         return render_template("photoUpload/addPhoto.html", msg="Key added to the queue, please wait a bit for the data")
     elif key:
-        print(get_cache(key))
         cache_response = json.loads(requests.post(API_ENDPOINT, json={
             "eventName": "GET_SINGLE_CACHE",
             "key": key
