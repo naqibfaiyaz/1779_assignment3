@@ -71,7 +71,7 @@ def putPhoto():
         
         # logger.info('Put request received- ' + str(response))
         if medium and medium=='api':
-            return cache_response
+            return queue_response
         else:
             return render_template("photoUpload/addPhoto.html", msg="Key added to the queue, please wait a bit for the data")
     elif key:
