@@ -119,14 +119,41 @@ def getSinglePhoto(url_key):
             "eventName": "GET_SINGLE_CACHE",
             "key": url_key
         }).content)
+    
+    print(cache_response)
+
+    if 'success' in cache_response and cache_response['success']:
+        if medium and medium=='api':
+            return cache_response
+        else:
+            return render_template("photoUpload/addPhoto.html", data=cache_response["content"], key=url_key)
+    else:
+        checkInDB = json.loads(get_key(url_key).data)
+        print(checkInDB)
+        if 'success' in checkInDB and checkInDB['success']:
+            cache_response = json.loads(requests.post(API_ENDPOINT, json={
+                "eventName": "PUT_CACHE",
+                "key": checkInDB['content']['key'],
+                "img_url": checkInDB['content']['img_url'],
+                "label": checkInDB['content']['labels'],
+                "categories": checkInDB['content']['categories']
+            }).content)
+            
+            print(cache_response)
+            if medium and medium=='api':
+                return cache_response
+            else:
+                if cache_response['success']:
+                    return render_template("photoUpload/addPhoto.html", data=cache_response["content"], key=url_key)
 
     if medium and medium=='api':
-        return cache_response
+        return {
+            'success': False,
+            'key': url_key,
+            'msg': 'Image not found'
+            }
     else:
-        if 'success' in cache_response and cache_response['success']:
-            return render_template("photoUpload/addPhoto.html", data=cache_response["content"], key=url_key)
-        elif "content" not in cache_response and "error" in cache_response:
-            return render_template("photoUpload/addPhoto.html", msg=cache_response["error"]["message"], key=url_key)
+        return render_template("photoUpload/addPhoto.html", msg="Image not found", key=url_key)
 
 @blueprint.route('/getAllCache',methods=['POST'])
 def getAllPhotos():
