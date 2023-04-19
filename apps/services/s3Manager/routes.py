@@ -79,3 +79,18 @@ def s3_delete_all(bucket=None, file=None, filename=None):
         return {
             "success": False,
             "msg": "Something went wrong"}
+
+
+def getBucketSize(bucketData):
+    s3 = boto3.resource('s3',
+        aws_access_key_id=AWS_ACCESS_KEY,
+        aws_secret_access_key=AWS_SECRET_KEY,
+        region_name='us-east-1')
+
+    bucket = s3.Bucket(bucketData)
+    total_size = 0
+    # bucket = boto3.resource('s3').Bucket('mybucket')
+    for object in bucket.objects.all():
+        total_size += object.size
+        
+    return total_size
